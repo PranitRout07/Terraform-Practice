@@ -17,9 +17,6 @@ resource "aws_iam_role" "lambda_role_terraform" {
   })
 
 }
-
-
-
 // attaching permissions
 resource "aws_iam_policy_attachment" "cloudwatch_policy" {
   name       = "cloudwatch-policy"
@@ -40,6 +37,11 @@ resource "aws_iam_policy_attachment" "cloudwatch_logs_policy" {
   name       = "cloudwatch-logs-policy"
   roles      = [aws_iam_role.lambda_role_terraform.name]
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
+}
+resource "aws_iam_policy_attachment" "cloudwatch_event_policy" {
+  name       = "cloudwatch-event-policy"
+  roles      = [aws_iam_role.lambda_role_terraform.name]
+  policy_arn = "arn:aws:iam::aws:policy/service-role/CloudWatchEventsBuiltInTargetExecutionAccess"
 }
 
 
