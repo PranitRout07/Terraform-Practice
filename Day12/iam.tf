@@ -38,14 +38,3 @@ resource "aws_iam_policy_attachment" "cloudwatch_logs_policy" {
   roles      = [aws_iam_role.lambda_role_terraform.name]
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
 }
-resource "aws_iam_policy_attachment" "cloudwatch_event_policy" {
-  name       = "cloudwatch-event-policy"
-  roles      = [aws_iam_role.lambda_role_terraform.name]
-  policy_arn = "arn:aws:iam::aws:policy/service-role/CloudWatchEventsBuiltInTargetExecutionAccess"
-}
-resource "aws_iam_policy_attachment" "cloudtrail_event_policy" {
-  name       = "cloudtrail-event-policy"
-  roles      = [aws_iam_role.lambda_role_terraform.name]
-  policy_arn = "arn:aws:iam::aws:policy/AWSCloudTrail_FullAccess"
-}
-

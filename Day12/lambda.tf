@@ -1,12 +1,8 @@
-provider "archive" {}
-
 data "archive_file" "zip" {
   type        = "zip"
   source_file = "s3_bucket_state_check.py"
   output_path = "s3_bucket_state_check.zip"
 }
-
-
 
 resource "aws_lambda_function" "lambda" {
   function_name = "s3_bucket_state_check"
@@ -20,44 +16,35 @@ resource "aws_lambda_function" "lambda" {
 
   environment {
     variables = {
-      SNS_TOPIC_ARN = aws_sns_topic.demo-topic.id
+      SNS_TOPIC_ARN = aws_sns_topic.demo-topic.arn
     }
   }
 }
 
+resource "aws_s3_bucket" "bucket" {
+  bucket = "test-demo-bucket-76768768768789790890890901"
 
-resource "aws_cloudwatch_event_rule" "lambda_trigger" {
-  name = "s3_bucket_state_change_trigger"
-  event_pattern = jsonencode({
-    "source": ["aws.s3"],
-    "detail-type": ["AWS API Call via CloudTrail"],
-    "detail": {
-      "eventSource": ["s3.amazonaws.com"],
-      "eventName": [
-        "AbortMultipartUpload",
-        "CompleteMultipartUpload",
-        "CopyObject",
-        "CreateBucket",
-        "CreateMultipartUpload",
-        "DeleteBucket",
-        "DeleteBucketCors"
-      ]
-    }
-  })
+  tags = {
+    Name        = "My bucket"
+    Environment = "Dev"
+  }
 }
 
+resource "aws_s3_bucket_notification" "lambda_trigger" {
+  bucket = aws_s3_bucket.bucket.id
 
-resource "aws_cloudwatch_event_target" "lambda_target" {
-  rule      = aws_cloudwatch_event_rule.lambda_trigger.name
-  target_id = aws_lambda_function.lambda.id
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.lambda.arn
+    events              = ["s3:ObjectCreated:*", "s3:ObjectRemoved:*"]  
+  }
 
-  arn = aws_lambda_function.lambda.arn
+  depends_on = [aws_lambda_permission.allow_s3_to_invoke_lambda]
 }
 
-resource "aws_lambda_permission" "allow_cloudwatch_to_invoke_lambda" {
-  statement_id  = "AllowExecutionFromCloudWatch"
+resource "aws_lambda_permission" "allow_s3_to_invoke_lambda" {
+  statement_id  = "AllowExecutionFromS3"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda.function_name
-  principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.lambda_trigger.arn
+  principal     = "s3.amazonaws.com"
+  source_arn    = aws_s3_bucket.bucket.arn
 }
