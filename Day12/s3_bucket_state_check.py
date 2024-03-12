@@ -13,7 +13,10 @@ def lambda_handler(event, context):
     key = record['s3']['object']['key']
     
 
-    message = f"Event '{event_name}' occurred for object '{key}' in bucket '{bucket}'"
+    message = f"""Bucket : '{bucket}'
+                Object : '{key}' 
+                Event : '{event_name}'    
+    """
     
     response = client.publish(
         TopicArn=sns_topic_arn,
