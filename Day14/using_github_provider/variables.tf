@@ -1,0 +1,8 @@
+variable "token" {
+
+}
+
+
+variable "username" {
+
+}
